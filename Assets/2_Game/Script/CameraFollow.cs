@@ -4,17 +4,7 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour {
 
-    public GameObject PlayerGams = null;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    [SerializeField] GameObject PlayerGams = null;
 
     void LateUpdate()
     {

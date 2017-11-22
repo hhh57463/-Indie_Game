@@ -8,7 +8,11 @@ public enum PlayerMoveDirection
     UP,
     DOWN,
     LEFT,
-    RIGHT
+    RIGHT,
+    UPLEFT,
+    LEFTDOWN,
+    RIGHTDOWN,
+    UPRIGHT
 }
 
 public class Player : MonoBehaviour
@@ -16,6 +20,12 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject PlayerGams = null;
     [SerializeField] GameObject BulletPrefab = null;
     [SerializeField] GameObject InhaleGams = null;
+
+    [SerializeField] Skills SkillUISc = null;
+
+    SpriteRenderer PlayerSr = null;
+
+    [SerializeField] Material PlayerTailMat = null;
 
     Vector3 PlayerPos;
 
@@ -26,8 +36,10 @@ public class Player : MonoBehaviour
 
     public PlayerMoveDirection PlayerDirect;
 
+    public int nFlashCool = 0;
+
+    public bool bFlashUse = false;
     bool bFlashSkill = false;
-    bool bFlashUse = false;
     bool bMoveCtr = false;
     bool bSkillCheck = false;
     bool bBulletShootDelay = false;
@@ -37,6 +49,8 @@ public class Player : MonoBehaviour
     void Start()
     {
         fMoveSpeed = 2.0f;
+        nFlashCool = 5;
+        PlayerSr = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -46,32 +60,56 @@ public class Player : MonoBehaviour
         Skill();
         PlayerRotate();
         ShootingBullet();
+        PlayerColor();
     }
 
     void Move()
     {
-        if (Input.GetKey(KeyCode.W) && !bMoveCtr)
+        if (!bMoveCtr)
         {
-            PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * Time.deltaTime);
-            PlayerDirect = PlayerMoveDirection.UP;
-        }
+            if (Input.GetKey(KeyCode.W))
+            {
+                PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * Time.deltaTime);
+                PlayerDirect = PlayerMoveDirection.UP;
+            }
 
-        if (Input.GetKey(KeyCode.S) && !bMoveCtr)
-        {
-            PlayerGams.transform.Translate(Vector3.down * fMoveSpeed * Time.deltaTime);
-            PlayerDirect = PlayerMoveDirection.DOWN;
-        }
+            if (Input.GetKey(KeyCode.S))
+            {
+                PlayerGams.transform.Translate(Vector3.down * fMoveSpeed * Time.deltaTime);
+                PlayerDirect = PlayerMoveDirection.DOWN;
+            }
 
-        if (Input.GetKey(KeyCode.A) && !bMoveCtr)
-        {
-            PlayerGams.transform.Translate(Vector3.left * fMoveSpeed * Time.deltaTime);
-            PlayerDirect = PlayerMoveDirection.LEFT;
-        }
+            if (Input.GetKey(KeyCode.A))
+            {
+                PlayerGams.transform.Translate(Vector3.left * fMoveSpeed * Time.deltaTime);
+                PlayerDirect = PlayerMoveDirection.LEFT;
+            }
 
-        if (Input.GetKey(KeyCode.D) && !bMoveCtr)
-        {
-            PlayerGams.transform.Translate(Vector3.right * fMoveSpeed * Time.deltaTime);
-            PlayerDirect = PlayerMoveDirection.RIGHT;
+            if (Input.GetKey(KeyCode.D))
+            {
+                PlayerGams.transform.Translate(Vector3.right * fMoveSpeed * Time.deltaTime);
+                PlayerDirect = PlayerMoveDirection.RIGHT;
+            }
+
+            if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A))
+            {
+                PlayerDirect = PlayerMoveDirection.UPLEFT;
+            }
+
+            if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D))
+            {
+                PlayerDirect = PlayerMoveDirection.UPRIGHT;
+            }
+
+            if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.A))
+            {
+                PlayerDirect = PlayerMoveDirection.LEFTDOWN;
+            }
+
+            if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.D))
+            {
+                PlayerDirect = PlayerMoveDirection.RIGHTDOWN;
+            }
         }
     }
 
@@ -83,6 +121,9 @@ public class Player : MonoBehaviour
             bFlashSkill = true;
             bMoveCtr = true;
             fFlashSkillCool = Time.time;
+            SkillUISc.FlashCoolText.enabled = true;
+            SkillUISc.FlashImg.fillAmount = 0;
+            StartCoroutine(FlashCount());
         }
         if (bFlashUse)
         {
@@ -171,12 +212,72 @@ public class Player : MonoBehaviour
                         bFlashUse = true;
                     }
                     break;
+
+                case PlayerMoveDirection.UPLEFT:
+                    if ((PlayerGams.transform.localPosition.y <= PlayerPos.y + 5f) && (PlayerGams.transform.localPosition.x >= PlayerPos.x - 5f))
+                    {
+                        PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * 20f * Time.deltaTime);
+                        PlayerGams.transform.Translate(Vector3.left * fMoveSpeed * 20f * Time.deltaTime);
+                    }
+                    else
+                    {
+                        bFlashSkill = false;
+                        PlayerDirect = PlayerMoveDirection.STOP;
+                        bMoveCtr = false;
+                        bFlashUse = true;
+                    }
+                    break;
+
+                case PlayerMoveDirection.UPRIGHT:
+                    if ((PlayerGams.transform.localPosition.y <= PlayerPos.y + 5f) && (PlayerGams.transform.localPosition.x <= PlayerPos.x + 5f))
+                    {
+                        PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * 20f * Time.deltaTime);
+                        PlayerGams.transform.Translate(Vector3.right * fMoveSpeed * 20f * Time.deltaTime);
+                    }
+                    else
+                    {
+                        bFlashSkill = false;
+                        PlayerDirect = PlayerMoveDirection.STOP;
+                        bMoveCtr = false;
+                        bFlashUse = true;
+                    }
+                    break;
+
+                case PlayerMoveDirection.LEFTDOWN:
+                    if ((PlayerGams.transform.localPosition.x >= PlayerPos.x - 5f) && (PlayerGams.transform.localPosition.y >= PlayerPos.y - 5f))
+                    {
+                        PlayerGams.transform.Translate(Vector3.down * fMoveSpeed * 20f * Time.deltaTime);
+                        PlayerGams.transform.Translate(Vector3.left * fMoveSpeed * 20f * Time.deltaTime);
+                    }
+                    else
+                    {
+                        bFlashSkill = false;
+                        PlayerDirect = PlayerMoveDirection.STOP;
+                        bMoveCtr = false;
+                        bFlashUse = true;
+                    }
+                    break;
+
+                case PlayerMoveDirection.RIGHTDOWN:
+                    if ((PlayerGams.transform.localPosition.x <= PlayerPos.x + 5f) && (PlayerGams.transform.localPosition.y >= PlayerPos.y - 5f))
+                    {
+                        PlayerGams.transform.Translate(Vector3.down * fMoveSpeed * 20f * Time.deltaTime);
+                        PlayerGams.transform.Translate(Vector3.right * fMoveSpeed * 20f * Time.deltaTime);
+                    }
+                    else
+                    {
+                        bFlashSkill = false;
+                        PlayerDirect = PlayerMoveDirection.STOP;
+                        bMoveCtr = false;
+                        bFlashUse = true;
+                    }
+                    break;
             }
         }
     }
 
     void PlayerRotate()
-{
+    {
         Vector3 mPosition = Input.mousePosition;
         Vector3 oPosition = transform.position;
 
@@ -205,6 +306,60 @@ public class Player : MonoBehaviour
         if (Time.time > fBulletDelay + 0.5f)                                //연사속도
         {
             bBulletShootDelay = false;
+        }
+    }
+
+    void PlayerColor()                              //빨 파 노 보 초
+    {
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            PlayerSr.color = new Color(255f, 255f, 255f, 255f);
+            PlayerTailMat.color = new Color(255f, 255f, 255f, 255f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            PlayerSr.color = new Color(255f, 0f, 0f, 255f);
+            PlayerTailMat.color = new Color(255f, 0f, 0f, 255f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            PlayerSr.color = new Color(0f, 0f, 255f, 255f);
+            PlayerTailMat.color = new Color(0f, 0f, 255f, 255f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            PlayerSr.color = new Color(255f, 255f, 0f, 255f);
+            PlayerTailMat.color = new Color(255f, 255f, 0f, 255f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            PlayerSr.color = new Color(255f, 0f, 255f, 255f);
+            PlayerTailMat.color = new Color(255f, 0f, 255f, 255f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            PlayerSr.color = new Color(0f, 255f, 0f, 255f);
+            PlayerTailMat.color = new Color(0f, 255f, 0f, 255f);
+        }
+
+    }
+
+    IEnumerator FlashCount()
+    {
+        yield return new WaitForSeconds(1f);
+        nFlashCool--;
+        if (nFlashCool > 0)
+            StartCoroutine(FlashCount());
+        else
+        {
+            nFlashCool = 5;
+            SkillUISc.FlashCoolText.enabled = false;
         }
     }
 
