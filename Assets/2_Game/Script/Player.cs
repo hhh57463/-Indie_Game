@@ -29,7 +29,7 @@ public class Player : MonoBehaviour
 
     Vector3 PlayerPos;
 
-    float fMoveSpeed = 0.0f;
+    public float fMoveSpeed = 0.0f;
     float fFlashSkillCool = 0.0f;
     float fRotateDegree = 0.0f;
     float fBulletDelay = 0.0f;
@@ -67,6 +67,13 @@ public class Player : MonoBehaviour
     {
         if (!bMoveCtr)
         {
+            if (PlayerDirect == PlayerMoveDirection.STOP)
+            {
+                if ((Input.GetKey(KeyCode.W)) || (Input.GetKey(KeyCode.S)) || (Input.GetKey(KeyCode.A)) || (Input.GetKey(KeyCode.D)))
+                {
+                    fMoveSpeed = 2.0f;
+                }
+            }
             if (Input.GetKey(KeyCode.W))
             {
                 PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * Time.deltaTime);
@@ -115,15 +122,18 @@ public class Player : MonoBehaviour
 
     void Skill()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && !bFlashUse)
+        if (PlayerDirect != PlayerMoveDirection.STOP)
         {
-            PlayerPos = PlayerGams.transform.localPosition;
-            bFlashSkill = true;
-            bMoveCtr = true;
-            fFlashSkillCool = Time.time;
-            SkillUISc.FlashCoolText.enabled = true;
-            SkillUISc.FlashImg.fillAmount = 0;
-            StartCoroutine(FlashCount());
+            if (Input.GetKeyDown(KeyCode.LeftShift) && !bFlashUse)
+            {
+                PlayerPos = PlayerGams.transform.localPosition;
+                bFlashSkill = true;
+                bMoveCtr = true;
+                fFlashSkillCool = Time.time;
+                SkillUISc.FlashCoolText.enabled = true;
+                SkillUISc.FlashImg.fillAmount = 0;
+                StartCoroutine(FlashCount());
+            }
         }
         if (bFlashUse)
         {
@@ -143,26 +153,51 @@ public class Player : MonoBehaviour
         {
             switch (PlayerDirect)
             {
-                case PlayerMoveDirection.STOP:
-                    if (PlayerGams.transform.localPosition.y <= PlayerPos.y + 5f)
-                    {
-                        PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * 20f * Time.deltaTime);
-                    }
-                    else
-                    {
-                        bFlashSkill = false;
-                        PlayerDirect = PlayerMoveDirection.STOP;
-                        bMoveCtr = false;
-                        bFlashUse = true;
-                    }
-                    break;
+                //case PlayerMoveDirection.STOP:
+                //    if (PlayerGams.transform.localPosition.y <= PlayerPos.y + 5f)
+                //    {
+                //        PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * 20f * Time.deltaTime);
+                //    }
+                //    else
+                //    {
+                //        bFlashSkill = false;
+                //        PlayerDirect = PlayerMoveDirection.STOP;
+                //        bMoveCtr = false;
+                //        bFlashUse = true;
+                //    }
+                //    break;
 
                 case PlayerMoveDirection.UP:
-                    if (PlayerGams.transform.localPosition.y <= PlayerPos.y + 5f)
+                    if (PlayerGams.transform.localPosition.y < 10f)
                     {
-                        PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * 20f * Time.deltaTime);
+                        if (PlayerGams.transform.localPosition.y <= PlayerPos.y + 5f)
+                        {
+                            PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * 20f * Time.deltaTime);
+                        }
+                        else
+                        {
+                            bFlashSkill = false;
+                            PlayerDirect = PlayerMoveDirection.STOP;
+                            bMoveCtr = false;
+                            bFlashUse = true;
+                        }
                     }
-                    else
+                    if (PlayerGams.transform.localPosition.y > 10f)
+                    {
+                        if (PlayerGams.transform.localPosition.y < 15.9f)
+                        {
+                            PlayerGams.transform.Translate(Vector3.up * fMoveSpeed * 20f * Time.deltaTime);
+                        }
+                        else
+                        {
+                            fMoveSpeed = 0;
+                            bFlashSkill = false;
+                            PlayerDirect = PlayerMoveDirection.STOP;
+                            bMoveCtr = false;
+                            bFlashUse = true;
+                        }
+                    }
+                    if (PlayerGams.transform.localPosition.y >= 16f)
                     {
                         bFlashSkill = false;
                         PlayerDirect = PlayerMoveDirection.STOP;
@@ -172,11 +207,38 @@ public class Player : MonoBehaviour
                     break;
 
                 case PlayerMoveDirection.DOWN:
-                    if (PlayerGams.transform.localPosition.y >= PlayerPos.y - 5f)
+                    if (PlayerGams.transform.localPosition.y > -10f)
                     {
-                        PlayerGams.transform.Translate(Vector3.down * fMoveSpeed * 20f * Time.deltaTime);
+                        if (PlayerGams.transform.localPosition.y >= PlayerPos.y - 5f)
+                        {
+                            PlayerGams.transform.Translate(Vector3.down * fMoveSpeed * 20f * Time.deltaTime);
+                        }
+                        else
+                        {
+                            bFlashSkill = false;
+                            PlayerDirect = PlayerMoveDirection.STOP;
+                            bMoveCtr = false;
+                            bFlashUse = true;
+                        }
                     }
-                    else
+
+                    if (PlayerGams.transform.localPosition.y < -10f)
+                    {
+                        if (PlayerGams.transform.localPosition.y > -15.9f)
+                        {
+                            PlayerGams.transform.Translate(Vector3.down * fMoveSpeed * 20f * Time.deltaTime);
+                        }
+                        else
+                        {
+                            fMoveSpeed = 0;
+                            bFlashSkill = false;
+                            PlayerDirect = PlayerMoveDirection.STOP;
+                            bMoveCtr = false;
+                            bFlashUse = true;
+                        }
+                    }
+
+                    if (PlayerGams.transform.localPosition.y <= -15.9f)
                     {
                         bFlashSkill = false;
                         PlayerDirect = PlayerMoveDirection.STOP;
@@ -186,11 +248,37 @@ public class Player : MonoBehaviour
                     break;
 
                 case PlayerMoveDirection.LEFT:
-                    if (PlayerGams.transform.localPosition.x >= PlayerPos.x - 5f)
+                    if (PlayerGams.transform.localPosition.x > -21f)
                     {
-                        PlayerGams.transform.Translate(Vector3.left * fMoveSpeed * 20f * Time.deltaTime);
+                        if (PlayerGams.transform.localPosition.x >= PlayerPos.x - 5f)
+                        {
+                            PlayerGams.transform.Translate(Vector3.left * fMoveSpeed * 20f * Time.deltaTime);
+                        }
+                        else
+                        {
+                            bFlashSkill = false;
+                            PlayerDirect = PlayerMoveDirection.STOP;
+                            bMoveCtr = false;
+                            bFlashUse = true;
+                        }
                     }
-                    else
+                    if (PlayerGams.transform.localPosition.x < -21f)
+                    {
+                        if (PlayerGams.transform.localPosition.x > -26.9f)
+                        {
+                            PlayerGams.transform.Translate(Vector3.left * fMoveSpeed * 20f * Time.deltaTime);
+                        }
+                        else
+                        {
+                            fMoveSpeed = 0;
+                            bFlashSkill = false;
+                            PlayerDirect = PlayerMoveDirection.STOP;
+                            bMoveCtr = false;
+                            bFlashUse = true;
+                        }
+                    }
+
+                    if (PlayerGams.transform.localPosition.y <= -26.9f)
                     {
                         bFlashSkill = false;
                         PlayerDirect = PlayerMoveDirection.STOP;
@@ -200,17 +288,45 @@ public class Player : MonoBehaviour
                     break;
 
                 case PlayerMoveDirection.RIGHT:
-                    if (PlayerGams.transform.localPosition.x <= PlayerPos.x + 5f)
+                    if (PlayerGams.transform.localPosition.x < 21f)
                     {
-                        PlayerGams.transform.Translate(Vector3.right * fMoveSpeed * 20f * Time.deltaTime);
+                        if (PlayerGams.transform.localPosition.x <= PlayerPos.x + 5f)
+                        {
+                            PlayerGams.transform.Translate(Vector3.right * fMoveSpeed * 20f * Time.deltaTime);
+                        }
+                        else
+                        {
+                            bFlashSkill = false;
+                            PlayerDirect = PlayerMoveDirection.STOP;
+                            bMoveCtr = false;
+                            bFlashUse = true;
+                        }
                     }
-                    else
+
+                    if (PlayerGams.transform.localPosition.x > 21f)
+                    {
+                        if (PlayerGams.transform.localPosition.x < 26.9f)
+                        {
+                            PlayerGams.transform.Translate(Vector3.right * fMoveSpeed * 20f * Time.deltaTime);
+                        }
+                        else
+                        {
+                            fMoveSpeed = 0;
+                            bFlashSkill = false;
+                            PlayerDirect = PlayerMoveDirection.STOP;
+                            bMoveCtr = false;
+                            bFlashUse = true;
+                        }
+                    }
+
+                    if (PlayerGams.transform.localPosition.y >= 26.9f)
                     {
                         bFlashSkill = false;
                         PlayerDirect = PlayerMoveDirection.STOP;
                         bMoveCtr = false;
                         bFlashUse = true;
                     }
+
                     break;
 
                 case PlayerMoveDirection.UPLEFT:

@@ -711,6 +711,7 @@ MonoBehaviour:
   InhaleGams: {fileID: 759070598}
   SkillUISc: {fileID: 510110309}
   PlayerTailMat: {fileID: 2100000, guid: efa07c585be508c488a9cc703f4faa3a, type: 2}
+  fMoveSpeed: 0
   PlayerDirect: 0
   nFlashCool: 0
   bFlashUse: 0
@@ -919,7 +920,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.66, y: 0.66}
   m_EdgeRadius: 0
 --- !u!50 &1001016339
 Rigidbody2D:
@@ -940,7 +941,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!1 &1146787980
 GameObject:
   m_ObjectHideFlags: 0
